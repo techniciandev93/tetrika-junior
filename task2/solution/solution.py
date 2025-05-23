@@ -21,10 +21,10 @@ def get_animals_wiki_first_page():
     return soup
 
 
-def return_verified_animal_titles(animals):
+def return_verified_animal_titles(animals, list_exclusions_during_search):
     animal_titles = []
     for animal in animals:
-        if animal['title'] in ['Rhizostoma pulmo']:
+        if animal['title'] in list_exclusions_during_search:
             continue
         if not has_cyrillic(animal['title']):
             return animal_titles, True
@@ -32,12 +32,12 @@ def return_verified_animal_titles(animals):
     return animal_titles, False
 
 
-def get_animals_wiki_letters_stats(soup):
+def get_animals_wiki_letters_stats(soup, list_exclusions_during_search):
     letter_stats = defaultdict(int)
     wiki_url = 'https://ru.wikipedia.org'
     while True:
         animals = soup.select('.mw-category-group ul')[2].select('li a')
-        animal_titles, should_stop = return_verified_animal_titles(animals)
+        animal_titles, should_stop = return_verified_animal_titles(animals, list_exclusions_during_search)
         for animal_title in animal_titles:
             first_letter = animal_title[0].upper()
             letter_stats[first_letter] += 1
@@ -61,8 +61,9 @@ def write_to_csv(file_name, write_data):
 
 
 if __name__ == '__main__':
+    list_exclusions_during_search = ['Rhizostoma pulmo']
     file_name_path = 'task2/beasts.csv'
     animals_wiki_first_page = get_animals_wiki_first_page()
-    letter_stats = get_animals_wiki_letters_stats(animals_wiki_first_page)
+    letter_stats = get_animals_wiki_letters_stats(animals_wiki_first_page, list_exclusions_during_search)
     converted_data_for_csv = [[key, value] for key, value in letter_stats.items()]
     write_to_csv(file_name_path, converted_data_for_csv)
